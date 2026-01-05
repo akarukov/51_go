@@ -9,12 +9,12 @@ import (
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-const shortUrlSize = 8
+const shortURLSize = 8
 const maxGenerationTries = 5
 
 type Repository interface {
-	GetShortenedUrl(req *repository.GetShortenedUrlRequest) (*repository.GetShortenedUrlResponse, error)
-	SetShortenedUrl(req *repository.SetShortenedUrlRequest) error
+	GetShortenedURL(req *repository.GetShortenedURLRequest) (*repository.GetShortenedURLResponse, error)
+	SetShortenedURL(req *repository.SetShortenedURLRequest) error
 }
 
 type ShortenerService struct {
@@ -28,33 +28,33 @@ func NewShortenerService(store Repository) *ShortenerService {
 	}
 }
 
-type GetShortenedUrlRequest struct {
+type GetShortenedURLRequest struct {
 	ShortUrl string
 }
 type GetShortenedUrlResponse struct {
-	Url string
+	URL string
 }
 
-type SetShortenedUrlRequest struct {
-	Url string
+type SetShortenedURLRequest struct {
+	URL string
 }
-type SetShortenedUrlResponse struct {
-	ShortUrl string
+type SetShortenedURLResponse struct {
+	ShortURL string
 }
 
 var (
-	ErrGetShortenedUrlInvalidRequest = errors.New("invalid get shortenedUrl request")
+	ErrGetShortenedURLInvalidRequest = errors.New("invalid get shortenedUrl request")
 	ErrRepoFailed                    = errors.New("repo failed")
 )
 
-func (f *ShortenerService) GetShortenedUrl(req *GetShortenedUrlRequest) (*GetShortenedUrlResponse, error) {
-	repositoryResp, err := f.store.GetShortenedUrl(&repository.GetShortenedUrlRequest{
-		ShortUrl: req.ShortUrl,
+func (f *ShortenerService) GetShortenedURL(req *GetShortenedURLRequest) (*GetShortenedUrlResponse, error) {
+	repositoryResp, err := f.store.GetShortenedURL(&repository.GetShortenedURLRequest{
+		ShortURL: req.ShortUrl,
 	})
 
 	if repositoryResp != nil {
 		return &GetShortenedUrlResponse{
-			Url: repositoryResp.Url,
+			URL: repositoryResp.URL,
 		}, nil
 	}
 
@@ -66,14 +66,14 @@ func (f *ShortenerService) GetShortenedUrl(req *GetShortenedUrlRequest) (*GetSho
 
 }
 
-func (f *ShortenerService) SetShortenedUrl(req *SetShortenedUrlRequest) (*SetShortenedUrlResponse, error) {
+func (f *ShortenerService) SetShortenedURL(req *SetShortenedURLRequest) (*SetShortenedURLResponse, error) {
 	var err error
-	var newShortUrl string
+	var newShortURL string
 	for i := 0; i < maxGenerationTries; i++ {
-		newShortUrl = f.generateNewShortUrl(shortUrlSize)
-		err = f.store.SetShortenedUrl(&repository.SetShortenedUrlRequest{
-			Url:      req.Url,
-			ShortUrl: newShortUrl,
+		newShortURL = f.generateNewShortURL(shortURLSize)
+		err = f.store.SetShortenedURL(&repository.SetShortenedURLRequest{
+			URL:      req.URL,
+			ShortURL: newShortURL,
 		})
 
 		if err == nil {
@@ -85,12 +85,12 @@ func (f *ShortenerService) SetShortenedUrl(req *SetShortenedUrlRequest) (*SetSho
 		return nil, fmt.Errorf("failed to set shortened url result from store: %w", err)
 	}
 
-	return &SetShortenedUrlResponse{
-		ShortUrl: newShortUrl,
+	return &SetShortenedURLResponse{
+		ShortURL: newShortURL,
 	}, nil
 }
 
-func (f *ShortenerService) generateNewShortUrl(length int) string {
+func (f *ShortenerService) generateNewShortURL(length int) string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	shortKey := make([]byte, length)
 	for i := range shortKey {

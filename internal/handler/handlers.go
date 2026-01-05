@@ -28,9 +28,9 @@ func newRouter(h *handlers) *http.ServeMux {
 	return mux
 }
 
-type ShortenedUrl interface {
-	GetShortenedURL(req *service.GetShortenedUrlRequest) (*service.GetShortenedUrlResponse, error)
-	SetShortenedURL(req *service.SetShortenedUrlRequest) (*service.SetShortenedUrlResponse, error)
+type ShortenedURL interface {
+	GetShortenedURL(req *service.GetShortenedURLRequest) (*service.GetShortenedUrlResponse, error)
+	SetShortenedURL(req *service.SetShortenedURLRequest) (*service.SetShortenedURLResponse, error)
 }
 
 type handlers struct {
@@ -47,7 +47,7 @@ func newHandlers(serverAddr string, shortenedService *service.ShortenerService) 
 
 func (h *handlers) GetShortenedURL(w http.ResponseWriter, r *http.Request) {
 	str := r.PathValue("shortUrl")
-	resp, err := h.ShortenerService.GetShortenedUrl(&service.GetShortenedUrlRequest{
+	resp, err := h.ShortenerService.GetShortenedURL(&service.GetShortenedURLRequest{
 		ShortUrl: str,
 	})
 	if err != nil {
@@ -56,7 +56,7 @@ func (h *handlers) GetShortenedURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if resp != nil {
-		http.Redirect(w, r, resp.Url, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, resp.URL, http.StatusTemporaryRedirect)
 	} else {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 	}
@@ -72,8 +72,8 @@ func (h *handlers) SetShortenedURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	str := string(body)
-	resp, err := h.ShortenerService.SetShortenedUrl(&service.SetShortenedUrlRequest{
-		Url: str,
+	resp, err := h.ShortenerService.SetShortenedURL(&service.SetShortenedURLRequest{
+		URL: str,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -81,7 +81,7 @@ func (h *handlers) SetShortenedURL(w http.ResponseWriter, r *http.Request) {
 	}
 	if resp != nil {
 		w.WriteHeader(http.StatusCreated)
-		str := "http://" + h.ServerAddr + "/" + resp.ShortUrl
+		str := "http://" + h.ServerAddr + "/" + resp.ShortURL
 		_, err = w.Write([]byte(str))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

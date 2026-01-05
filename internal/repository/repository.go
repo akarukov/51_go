@@ -7,8 +7,8 @@ import (
 )
 
 type Repository interface {
-	GetShortenedUrl(req *GetShortenedUrlRequest) (*GetShortenedUrlResponse, error)
-	SetShortenedUrlRequest(req *SetShortenedUrlRequest) error
+	GetShortenedUrl(req *GetShortenedURLRequest) (*GetShortenedURLResponse, error)
+	SetShortenedUrlRequest(req *SetShortenedURLRequest) error
 }
 
 type Store struct {
@@ -23,54 +23,54 @@ func NewStore() *Store {
 	}
 }
 
-type GetShortenedUrlRequest struct {
-	ShortUrl string
+type GetShortenedURLRequest struct {
+	ShortURL string
 }
 
-type GetShortenedUrlResponse struct {
-	Url string
+type GetShortenedURLResponse struct {
+	URL string
 }
 
 var (
-	ErrGetShortenedUrlNotFound = errors.New("url not found")
-	ErrSetShortenedUrlExists   = errors.New("shortUrl is already exists")
+	ErrGetShortenedURLNotFound = errors.New("url not found")
+	ErrSetShortenedURLExists   = errors.New("shortUrl is already exists")
 )
 
-func newErrGetShortenedUrlNotFound(shortUrl string) error {
-	return fmt.Errorf("%w for shortUrl = %s", ErrGetShortenedUrlNotFound, shortUrl)
+func newErrGetShortenedURLNotFound(shortURL string) error {
+	return fmt.Errorf("%w for shortUrl = %s", ErrGetShortenedURLNotFound, shortURL)
 }
 
-func newErrSetShortenedUrlExists(shortUrl string) error {
-	return fmt.Errorf("%w for shortUrl = %s", ErrSetShortenedUrlExists, shortUrl)
+func newErrSetShortenedURLExists(shortURL string) error {
+	return fmt.Errorf("%w for shortUrl = %s", ErrSetShortenedURLExists, shortURL)
 }
 
-func (s *Store) GetShortenedUrl(req *GetShortenedUrlRequest) (*GetShortenedUrlResponse, error) {
+func (s *Store) GetShortenedURL(req *GetShortenedURLRequest) (*GetShortenedURLResponse, error) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	res, ok := s.s[req.ShortUrl]
+	res, ok := s.s[req.ShortURL]
 	if !ok {
-		return nil, newErrGetShortenedUrlNotFound(req.ShortUrl)
+		return nil, newErrGetShortenedURLNotFound(req.ShortURL)
 	}
-	return &GetShortenedUrlResponse{
-		Url: res,
+	return &GetShortenedURLResponse{
+		URL: res,
 	}, nil
 }
 
-type SetShortenedUrlRequest struct {
-	Url      string
-	ShortUrl string
+type SetShortenedURLRequest struct {
+	URL      string
+	ShortURL string
 }
 
-func (s *Store) SetShortenedUrl(req *SetShortenedUrlRequest) error {
+func (s *Store) SetShortenedURL(req *SetShortenedURLRequest) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	originUrl, ok := s.s[req.ShortUrl]
-	if ok && originUrl != req.Url {
-		return newErrSetShortenedUrlExists(req.ShortUrl)
+	originURL, ok := s.s[req.ShortURL]
+	if ok && originURL != req.URL {
+		return newErrSetShortenedURLExists(req.ShortURL)
 	} else {
-		s.s[req.ShortUrl] = req.Url
+		s.s[req.ShortURL] = req.URL
 		return nil
 	}
 }
