@@ -29,7 +29,7 @@ func newRouter(h *handlers) *http.ServeMux {
 }
 
 type ShortenedURL interface {
-	GetShortenedURL(req *service.GetShortenedURLRequest) (*service.GetShortenedUrlResponse, error)
+	GetShortenedURL(req *service.GetShortenedURLRequest) (*service.GetShortenedURLResponse, error)
 	SetShortenedURL(req *service.SetShortenedURLRequest) (*service.SetShortenedURLResponse, error)
 }
 
@@ -48,7 +48,7 @@ func newHandlers(serverAddr string, shortenedService *service.ShortenerService) 
 func (h *handlers) GetShortenedURL(w http.ResponseWriter, r *http.Request) {
 	str := r.PathValue("shortUrl")
 	resp, err := h.ShortenerService.GetShortenedURL(&service.GetShortenedURLRequest{
-		ShortUrl: str,
+		ShortURL: str,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

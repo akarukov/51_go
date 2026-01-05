@@ -29,9 +29,9 @@ func NewShortenerService(store Repository) *ShortenerService {
 }
 
 type GetShortenedURLRequest struct {
-	ShortUrl string
+	ShortURL string
 }
-type GetShortenedUrlResponse struct {
+type GetShortenedURLResponse struct {
 	URL string
 }
 
@@ -47,13 +47,13 @@ var (
 	ErrRepoFailed                    = errors.New("repo failed")
 )
 
-func (f *ShortenerService) GetShortenedURL(req *GetShortenedURLRequest) (*GetShortenedUrlResponse, error) {
+func (f *ShortenerService) GetShortenedURL(req *GetShortenedURLRequest) (*GetShortenedURLResponse, error) {
 	repositoryResp, err := f.store.GetShortenedURL(&repository.GetShortenedURLRequest{
-		ShortURL: req.ShortUrl,
+		ShortURL: req.ShortURL,
 	})
 
 	if repositoryResp != nil {
-		return &GetShortenedUrlResponse{
+		return &GetShortenedURLResponse{
 			URL: repositoryResp.URL,
 		}, nil
 	}
