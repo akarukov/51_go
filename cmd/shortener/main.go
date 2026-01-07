@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/akarukov/51_go.git/internal/config"
 	handlers "github.com/akarukov/51_go.git/internal/handler"
 	"github.com/akarukov/51_go.git/internal/repository"
@@ -20,6 +19,6 @@ func runServer() error {
 	store := repository.NewStore()
 	shortenerService := service.NewShortenerService(store)
 
-	fmt.Printf("Start server at %s\n", cfg.ServerAddr)
+	log.Printf("Start server at %s\n", cfg.ServerAddr)
 	return handlers.Serve(cfg, shortenerService)
 }

@@ -12,17 +12,17 @@ const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 const shortURLSize = 8
 const maxGenerationTries = 5
 
-type Repository interface {
+type RepositoryInterface interface {
 	GetShortenedURL(req *repository.GetShortenedURLRequest) (*repository.GetShortenedURLResponse, error)
 	SetShortenedURL(req *repository.SetShortenedURLRequest) error
 }
 
 type ShortenerService struct {
-	store Repository
+	store RepositoryInterface
 	addr  string
 }
 
-func NewShortenerService(store Repository) *ShortenerService {
+func NewShortenerService(store RepositoryInterface) *ShortenerService {
 	return &ShortenerService{
 		store: store,
 	}
@@ -43,8 +43,9 @@ type SetShortenedURLResponse struct {
 }
 
 var (
-	ErrGetShortenedURLInvalidRequest = errors.New("invalid get shortenedUrl request")
-	ErrRepoFailed                    = errors.New("repo failed")
+	errImpossibleCase = errors.New("unknown error, impossible case")
+	errFailedToFetch  = errors.New("failed to fetch shortened url result from store")
+	errFailedToStore  = errors.New("failed to store url")
 )
 
 func (f *ShortenerService) GetShortenedURL(req *GetShortenedURLRequest) (*GetShortenedURLResponse, error) {
@@ -52,17 +53,17 @@ func (f *ShortenerService) GetShortenedURL(req *GetShortenedURLRequest) (*GetSho
 		ShortURL: req.ShortURL,
 	})
 
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errFailedToFetch, err)
+	}
+
 	if repositoryResp != nil {
 		return &GetShortenedURLResponse{
 			URL: repositoryResp.URL,
 		}, nil
 	}
 
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch shortened url result from store: %w", err)
-	}
-
-	return nil, ErrRepoFailed
+	return nil, errImpossibleCase
 
 }
 
@@ -82,7 +83,7 @@ func (f *ShortenerService) SetShortenedURL(req *SetShortenedURLRequest) (*SetSho
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to set shortened url result from store: %w", err)
+		return nil, fmt.Errorf("%s: %w", errFailedToStore, err)
 	}
 
 	return &SetShortenedURLResponse{

@@ -4,10 +4,16 @@ import (
 	"github.com/akarukov/51_go.git/internal/config"
 	"github.com/akarukov/51_go.git/internal/service"
 	"io"
+	"log"
 	"net/http"
 )
 
-func Serve(cfg *config.Config, shortener *service.ShortenerService) error {
+type ShortenerServiceInterface interface {
+	GetShortenedURL(req *service.GetShortenedURLRequest) (*service.GetShortenedURLResponse, error)
+	SetShortenedURL(req *service.SetShortenedURLRequest) (*service.SetShortenedURLResponse, error)
+}
+
+func Serve(cfg *config.Config, shortener ShortenerServiceInterface) error {
 	h := newHandlers(cfg.ServerAddr, shortener)
 	router := newRouter(h)
 
@@ -28,17 +34,12 @@ func newRouter(h *handlers) *http.ServeMux {
 	return mux
 }
 
-type ShortenedURL interface {
-	GetShortenedURL(req *service.GetShortenedURLRequest) (*service.GetShortenedURLResponse, error)
-	SetShortenedURL(req *service.SetShortenedURLRequest) (*service.SetShortenedURLResponse, error)
-}
-
 type handlers struct {
-	ShortenerService *service.ShortenerService
+	ShortenerService ShortenerServiceInterface
 	ServerAddr       string
 }
 
-func newHandlers(serverAddr string, shortenedService *service.ShortenerService) *handlers {
+func newHandlers(serverAddr string, shortenedService ShortenerServiceInterface) *handlers {
 	return &handlers{
 		ShortenerService: shortenedService,
 		ServerAddr:       serverAddr,
@@ -58,7 +59,8 @@ func (h *handlers) GetShortenedURL(w http.ResponseWriter, r *http.Request) {
 	if resp != nil {
 		http.Redirect(w, r, resp.URL, http.StatusTemporaryRedirect)
 	} else {
-		http.Error(w, "internal error", http.StatusInternalServerError)
+		log.Printf("unknown error")
+		http.Error(w, "", http.StatusInternalServerError)
 	}
 }
 
@@ -84,9 +86,10 @@ func (h *handlers) SetShortenedURL(w http.ResponseWriter, r *http.Request) {
 		str := "http://" + h.ServerAddr + "/" + resp.ShortURL
 		_, err = w.Write([]byte(str))
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "", http.StatusInternalServerError)
 		}
 	} else {
-		http.Error(w, "internal error", http.StatusInternalServerError)
+		log.Printf("can't generate unique shortURL")
+		http.Error(w, "", http.StatusInternalServerError)
 	}
 }

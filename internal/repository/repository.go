@@ -6,11 +6,6 @@ import (
 	"sync"
 )
 
-type Repository interface {
-	GetShortenedUrl(req *GetShortenedURLRequest) (*GetShortenedURLResponse, error)
-	SetShortenedUrlRequest(req *SetShortenedURLRequest) error
-}
-
 type Store struct {
 	mux *sync.Mutex
 	s   map[string]string
@@ -32,17 +27,9 @@ type GetShortenedURLResponse struct {
 }
 
 var (
-	ErrGetShortenedURLNotFound = errors.New("url not found")
-	ErrSetShortenedURLExists   = errors.New("shortUrl is already exists")
+	errGetShortenedURLNotFound = errors.New("url not found")
+	errSetShortenedURLExists   = errors.New("shortUrl is already exists")
 )
-
-func newErrGetShortenedURLNotFound(shortURL string) error {
-	return fmt.Errorf("%w for shortUrl = %s", ErrGetShortenedURLNotFound, shortURL)
-}
-
-func newErrSetShortenedURLExists(shortURL string) error {
-	return fmt.Errorf("%w for shortUrl = %s", ErrSetShortenedURLExists, shortURL)
-}
 
 func (s *Store) GetShortenedURL(req *GetShortenedURLRequest) (*GetShortenedURLResponse, error) {
 	s.mux.Lock()
@@ -50,7 +37,7 @@ func (s *Store) GetShortenedURL(req *GetShortenedURLRequest) (*GetShortenedURLRe
 
 	res, ok := s.s[req.ShortURL]
 	if !ok {
-		return nil, newErrGetShortenedURLNotFound(req.ShortURL)
+		return nil, fmt.Errorf("%w for shortUrl = %s", errGetShortenedURLNotFound, req.ShortURL)
 	}
 	return &GetShortenedURLResponse{
 		URL: res,
@@ -68,7 +55,7 @@ func (s *Store) SetShortenedURL(req *SetShortenedURLRequest) error {
 
 	originURL, ok := s.s[req.ShortURL]
 	if ok && originURL != req.URL {
-		return newErrSetShortenedURLExists(req.ShortURL)
+		return fmt.Errorf("%w for shortUrl = %s", errSetShortenedURLExists, req.ShortURL)
 	} else {
 		s.s[req.ShortURL] = req.URL
 		return nil
