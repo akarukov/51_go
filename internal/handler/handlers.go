@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/akarukov/51_go.git/internal/config"
 	"github.com/akarukov/51_go.git/internal/service"
+	"github.com/go-chi/chi/v5"
 	"io"
 	"log"
 	"net/http"
@@ -25,13 +26,13 @@ func Serve(cfg *config.Config, shortener ShortenerServiceInterface) error {
 	return srv.ListenAndServe()
 }
 
-func newRouter(h *handlers) *http.ServeMux {
-	mux := http.NewServeMux()
+func newRouter(h *handlers) *chi.Mux {
+	r := chi.NewRouter()
 
-	mux.HandleFunc("GET /{shortUrl}", h.GetShortenedURL)
-	mux.HandleFunc("POST /", h.SetShortenedURL)
+	r.Get("/{shortUrl}", h.GetShortenedURL)
+	r.Post("/", h.SetShortenedURL)
 
-	return mux
+	return r
 }
 
 type handlers struct {
