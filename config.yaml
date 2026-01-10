@@ -1,0 +1,3 @@
+# Server configurations
+ServerAddr: "localhost:8080"
+ReferenceAddr: "http://localhost:8080"
