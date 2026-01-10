@@ -25,7 +25,7 @@ func Test_handlersShortenedURL(t *testing.T) {
 	router := newRouter(handlers)
 
 	var rurl string
-	localURL := "http://" + referenceAddr
+	localURL := referenceAddr
 	longURL := "https://practicum.yandex.ru/ "
 	t.Run("Create shortUrl", func(t *testing.T) {
 		writer := httptest.NewRecorder()
