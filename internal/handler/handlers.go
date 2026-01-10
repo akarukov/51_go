@@ -15,7 +15,7 @@ type ShortenerServiceInterface interface {
 }
 
 func Serve(cfg *config.Config, shortener ShortenerServiceInterface) error {
-	h := newHandlers(cfg.ServerAddr, shortener)
+	h := newHandlers(cfg.ReferenceAddr, shortener)
 	router := newRouter(h)
 
 	srv := http.Server{
@@ -37,13 +37,13 @@ func newRouter(h *handlers) *chi.Mux {
 
 type handlers struct {
 	ShortenerService ShortenerServiceInterface
-	ServerAddr       string
+	ReferenceAddr    string
 }
 
-func newHandlers(serverAddr string, shortenedService ShortenerServiceInterface) *handlers {
+func newHandlers(refAddr string, shortenedService ShortenerServiceInterface) *handlers {
 	return &handlers{
 		ShortenerService: shortenedService,
-		ServerAddr:       serverAddr,
+		ReferenceAddr:    refAddr,
 	}
 }
 
@@ -84,8 +84,8 @@ func (h *handlers) SetShortenedURL(w http.ResponseWriter, r *http.Request) {
 	}
 	if resp != nil {
 		w.WriteHeader(http.StatusCreated)
-		str := "http://" + h.ServerAddr + "/" + resp.ShortURL
-		_, err = w.Write([]byte(str))
+		result := h.ReferenceAddr + "/" + resp.ShortURL
+		_, err = w.Write([]byte(result))
 		if err != nil {
 			http.Error(w, "", http.StatusInternalServerError)
 		}

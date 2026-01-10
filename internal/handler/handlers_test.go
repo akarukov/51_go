@@ -17,14 +17,15 @@ func Test_handlersShortenedURL(t *testing.T) {
 		response    string
 		contentType string
 	}
-	serverAddr := "localhost:8080"
+	//serverAddr := "localhost:8080"
+	referenceAddr := "localhost:8081"
 	store := repository.NewStore()
 	shortenerService := service.NewShortenerService(store)
-	handlers := newHandlers(serverAddr, shortenerService)
+	handlers := newHandlers(referenceAddr, shortenerService)
 	router := newRouter(handlers)
 
 	var rurl string
-	localURL := "http://" + serverAddr
+	localURL := "http://" + referenceAddr
 	longURL := "https://practicum.yandex.ru/ "
 	t.Run("Create shortUrl", func(t *testing.T) {
 		writer := httptest.NewRecorder()
